@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/cars_provider.dart';
+import 'package:flutter_application_1/providers/cart_provider.dart';
+import 'package:flutter_application_1/screens/car_details.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'screens/cart.dart';
 
 void main() async {
   // Ensures Flutter framework services are ready before running asynchronous native code
@@ -46,10 +49,51 @@ class HomeScreen extends ConsumerWidget { // Switched to ConsumerWidget
     // Watch your cars list provider
     final carsAsync = ref.watch(carsListProvider);
 
+    // Watch the cart items to display a real-time count badge
+    final cartItems = ref.watch(cartProvider);
+    final totalCartItems = cartItems.fold(0, (sum, item) => sum + item.quantity);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Kids Ride-On Cars Store'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart, size: 28),
+              onPressed: () {
+                // 2. THIS OPENS YOUR HIDDEN CART SCREEN
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Cart()),
+                );
+              },
+            ),
+            // Floating numeric bubble badge showing current count
+            if (totalCartItems > 0)
+              Positioned(
+                right: 4,
+                top: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Text(
+                    '$totalCartItems',
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(width: 12),
+      ]
       ),
       body: carsAsync.when(
         // 1. Handled Data State
@@ -64,28 +108,39 @@ class HomeScreen extends ConsumerWidget { // Switched to ConsumerWidget
           itemCount: cars.length,
           itemBuilder: (context, index) {
             final car = cars[index];
-            return Card(
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: car.imageUrl != null
-                        ? Image.network(car.imageUrl!, fit: BoxFit.cover, width: double.infinity)
-                        : const Center(child: Icon(Icons.directions_car, size: 50)),
+            return InkWell( // Wrap card with InkWell for click action
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CarDetails(car: car),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(car.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('\$${car.price.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green)),
-                  ),
-                ],
+                );
+              },
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: car.imageUrl != null
+                          ? Image.network(car.imageUrl!, fit: BoxFit.cover, width: double.infinity)
+                          : const Center(child: Icon(Icons.directions_car, size: 50)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(car.name, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('₹${car.price.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500)),
+                    ),
+                  ],
+                ),
               ),
             );
           },
+
         ),
         // 2. Handled Loading State
         loading: () => const Center(child: CircularProgressIndicator()),
