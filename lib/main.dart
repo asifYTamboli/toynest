@@ -5,6 +5,24 @@ import 'package:flutter_application_1/screens/car_details.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/cart.dart';
+import 'screens/admin_login.dart';
+import 'screens/admin_dashboard.dart';
+
+
+// 1. Create a class to hold your admin login true/false state status
+class AdminModeNotifier extends Notifier<bool> {
+  @override
+  bool build() => false; // Sets your default starting value to false
+
+  void setAdminMode(bool value) {
+    state = value; // Allows switching states during login
+  }
+}
+
+// 2. Expose the notifier to your entire application tree globally
+final isAdminModeProvider = NotifierProvider<AdminModeNotifier, bool>(AdminModeNotifier.new);
+
+
 
 void main() async {
   // Ensures Flutter framework services are ready before running asynchronous native code
@@ -46,6 +64,8 @@ class HomeScreen extends ConsumerWidget { // Switched to ConsumerWidget
 
   @override
   Widget build(BuildContext context, WidgetRef ref) { // Added WidgetRef parameter
+
+  
     // Watch your cars list provider
     final carsAsync = ref.watch(carsListProvider);
 
@@ -58,6 +78,32 @@ class HomeScreen extends ConsumerWidget { // Switched to ConsumerWidget
         title: const Text('Kids Ride-On Cars Store'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.admin_panel_settings, size: 26),
+            onPressed: () {
+              // 1. Read your active login state flag from your NotifierProvider
+              final bool isLoggedIn = ref.read(isAdminModeProvider);
+
+              if (isLoggedIn) {
+                // 2. Already Logged In: Route straight to your active Operations Dashboard panel
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminDashboardScreen(),
+                  ),
+                );
+              } else {
+                // 3. Not Logged In: Open the secure login credentials form entry page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminLoginScreen(),
+                  ),
+                );
+              }
+            },
+          ),
+
         Stack(
           alignment: Alignment.center,
           children: [

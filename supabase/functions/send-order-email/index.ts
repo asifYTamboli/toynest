@@ -25,12 +25,17 @@ serve(async (req) => {
 
     let orderSummary = "";
     cartItems.forEach((item: any) => {
-      orderSummary += `${item.car} (Qty: ${item.quantity}) - ₹${item.subtotal.toFixed(2)}, `;
+      orderSummary += `${item.name} (Qty: ${item.quantity}) - ₹${item.subtotal.toFixed(2)}, `;
     });
     orderSummary = orderSummary.replace(/,\s*$/, ""); // Clean up trailing comma
 
-    const apiUrl = `https://facebook.com{PHONE_NUMBER_ID}/messages`;
-    
+    const g = "gr" + "aph.";
+    const v = "v1" + "7.0/";
+    /* const apiUrl = "https://" + g + "://facebook.com" + v + PHONE_NUMBER_ID + "/messages"; */
+    const apiUrl = "https://graph.facebook.com/" + v + PHONE_NUMBER_ID + "/messages"; 
+
+
+       
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -48,6 +53,27 @@ serve(async (req) => {
         }
       })
     });
+
+        // Replace the body: JSON.stringify({...}) segment in your index.ts with this layout:
+    /* const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: myWhatsAppNumber,
+        type: "template", // 1. Switched from 'text' to 'template'
+        template: {
+          name: "hello_world", // 2. Targets Meta's pre-approved default testing layout
+          language: {
+            code: "en_US"
+          }
+        }
+      })
+    }); */
+
 
     const resData = await response.json();
     

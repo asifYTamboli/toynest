@@ -105,7 +105,7 @@ class Cart extends ConsumerWidget {
                             item.car.imageUrl ?? '', 
                             width: 50, 
                             fit: BoxFit.cover, 
-                            errorBuilder: (_, __, _) => const Icon(Icons.directions_car),
+                            errorBuilder: (_, _, _) => const Icon(Icons.directions_car),
                           ),
                           title: Text(item.car.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text('₹${item.car.price} × ${item.quantity} = ₹${item.car.price * item.quantity}'),
