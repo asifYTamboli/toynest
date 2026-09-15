@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 // 1. IMPORT DART HTML TO UNBLOCK BROWSERS
-import 'dart:html' as html; 
 import '../providers/cart_provider.dart';
 
 class Cart extends ConsumerWidget {
